@@ -53,25 +53,31 @@ app.post('/api/tasks', async (req, res) => {
   }
 });
 
-// ============================================================
-// TAREA (asignada por el profe en el video, min 23:05):
-// Implementar aquí:
-//   1) PUT  /api/tasks/:id   -> actualizar título y/o "completed"
-//   2) DELETE /api/tasks/:id -> eliminar una tarea
-//
-// Pista para PUT:
-//   const { id } = req.params;
-//   const { title, completed } = req.body;
-//   await pool.query('UPDATE task SET title = ?, completed = ? WHERE id = ?',
-//                     [title, completed, id]);
-//
-// Pista para DELETE:
-//   const { id } = req.params;
-//   await pool.query('DELETE FROM task WHERE id = ?', [id]);
-//
-// Recuerda: siempre usa "?" (parámetros preparados) y nunca concatenes
-// el valor directo en el SQL, para evitar inyección SQL.
-// ============================================================
+// --- Actualizar una tarea (título y/o estado completado) ---
+app.put('/api/tasks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, completed } = req.body;
+    await pool.query(
+      'UPDATE task SET title = ?, completed = ? WHERE id = ?',
+      [title, completed, id]
+    );
+    res.json({ id, title, completed });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
+
+// --- Eliminar una tarea ---
+app.delete('/api/tasks/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query('DELETE FROM task WHERE id = ?', [id]);
+    res.json({ message: 'Tarea eliminada', id });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+});
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
